@@ -1,30 +1,14 @@
 {
-  "name": "ionic",
-  "version": "1.0.0-beta.9",
-  "codename": "gadolinium-gator",
-  "homepage": "https://github.com/driftyco/ionic",
-  "authors": [
-    "Max Lynch <max@drifty.com>",
-    "Adam Bradley <adam@drifty.com>",
-    "Ben Sperry <ben@drifty.com>"
-  ],
-  "description": "Advanced HTML5 hybrid mobile app development framework.",
+  "name": "covalent",
+  "version": "0.0.1",
+  "homepage": "https://github.com/bitpay/covalent",
+  "ionic_version": "1.0.0-beta.9",
+  "description": "Ionic for all the things.",
   "main": [
     "release/css/ionic.css",
     "release/fonts/*",
     "release/js/ionic.js",
     "release/js/ionic-angular.js"
-  ],
-  "keywords": [
-    "mobile",
-    "html5",
-    "ionic",
-    "cordova",
-    "phonegap",
-    "trigger",
-    "triggerio",
-    "angularjs",
-    "angular"
   ],
   "license": "MIT",
   "private": false,
