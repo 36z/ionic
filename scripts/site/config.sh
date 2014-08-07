@@ -12,7 +12,7 @@ function init {
 
   ../clone/clone.sh --repository="driftyco/ionic-site" \
     --directory="$SITE_DIR" \
-    --branch="gh-pages"
+    --branch="master"
 }
 
 function run {
@@ -23,14 +23,16 @@ function run {
   DATE=$(date +"%Y-%m-%d")
 
   cd $SITE_DIR
+  npm install
 
   $(replaceInFile "_config.yml" "latest_download:.*$" "latest_download: http:\/\/code.ionicframework.com\/$VERSION\/ionic-v$VERSION.zip")
   $(replaceInFile "_config.yml" "latest_version:.*$" "latest_version: $VERSION \"$CODENAME\"")
   $(replaceInFile "_config.yml" "latest_release_date:.*$" "latest_release_date: $DATE")
 
-  git add -A
-  git commit -am "release: $VERSION"
-  git push -q origin gh-pages
+  # git add -A
+  # git commit -am "release: $VERSION"
+  # git push -q origin master
+  source deploy.sh
 
   echo "-- Published ionic-site config v$VERSION successfully!"
 }

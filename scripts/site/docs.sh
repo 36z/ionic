@@ -13,7 +13,7 @@ function init {
 
   ../clone/clone.sh --repository="driftyco/ionic-site" \
     --directory="$SITE_DIR" \
-    --branch="gh-pages"
+    --branch="master"
 }
 
 # Example: ./scripts/site/publish.sh --action=docs --version-name=nightly
@@ -26,6 +26,7 @@ function run {
   node_modules/.bin/gulp docs-index --dist=$SITE_DIR
 
   cd $SITE_DIR
+  npm install
 
   CHANGES=$(git status --porcelain)
 
@@ -33,9 +34,10 @@ function run {
   if [[ "$CHANGES" == "" ]]; then
     echo "-- No changes detected in docs for $VERSION_NAME; docs not updated."
   else
-    git add -A
-    git commit -am "docs: update for $VERSION"
-    git push -q origin gh-pages
+    # git add -A
+    # git commit -am "docs: update for $VERSION"
+    # git push -q origin gh-pages
+    source deploy.sh
 
     echo "-- Updated docs for $VERSION_NAME succesfully!"
   fi
