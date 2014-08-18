@@ -4,7 +4,7 @@
   *
   * Ported from github.com/EightMedia/hammer.js Gestures - thanks!
   */
-(function(ionic) {
+(function(ionic, device) {
 
   /**
    * ionic.Gestures
@@ -26,7 +26,7 @@
     // its native behavior. this doesnt prevent the scrolling,
     // but cancels the contextmenu, tap highlighting etc
     // set to false to disable this
-    stop_browser_behavior: false
+    stop_browser_behavior: device ? 'disable-user-behavior' : false
   };
 
   // detect touchevents
@@ -1394,4 +1394,4 @@
       }
     }
   };
-})(window.ionic);
+})(window.ionic, window.device);

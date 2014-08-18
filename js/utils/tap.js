@@ -157,7 +157,7 @@ ionic.tap = {
            (e.target.dataset ? e.target.dataset.preventScroll : e.target.getAttribute('data-prevent-default')) == 'true' || // manually set within an elements attributes
            (!!(/^(object|embed)$/i).test(e.target.tagName)) ||  // flash/movie/object touches should not try to scroll
            ionic.tap.isElementTapDisabled(e.target) || // check if this element, or an ancestor, has `data-tap-disabled` attribute
-           e.type == 'mousedown'; // not touch event
+           !window.device; // if running in cordova
   },
 
   isTextInput: function(ele) {
