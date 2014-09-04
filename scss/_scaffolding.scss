@@ -22,7 +22,6 @@ body,
   @include font-smoothing(antialiased);
   @include text-size-adjust(none);
   @include tap-highlight-transparent();
-  @include user-select(none);
 
   top: 0;
   right: 0;
@@ -88,7 +87,6 @@ body.grade-c {
  * scroll view functionality.
  */
 .scroll {
-  @include user-select(none);
   @include touch-callout(none);
   @include text-size-adjust(none);
   @include transform-origin(left, top);
