@@ -1037,7 +1037,7 @@ function($rootScope, $timeout) {
   forEach(CollectionRepeatManager.prototype, function(method, key) {
     if (exceptions[key]) return;
     CollectionRepeatManager.prototype[key] = function() {
-      void 0;
+      console.log(key + '(', arguments, ')');
       return method.apply(this, arguments);
     };
   });
@@ -7755,7 +7755,7 @@ function($timeout, $compile, $ionicSlideBoxDelegate) {
       };
 
       this.onPagerClick = function(index) {
-        void 0;
+        console.log('pagerClick', index);
         $scope.pagerClick({index: index});
       };
 
