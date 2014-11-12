@@ -95,11 +95,6 @@ body.grade-c {
   @include transform-origin(left, top);
 }
 
-// hide webkit scrollbars
-::-webkit-scrollbar {
-  display:none;
-}
-
 // Scroll bar styles
 .scroll-bar {
   position: absolute;
@@ -279,6 +274,23 @@ ion-infinite-scroll {
 .overflow-scroll {
   overflow-x: hidden;
   overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  position: absolute;
+
+  .scroll {
+    position: static;
+    height: 100%;
+    -webkit-transform: translate3d(0, 0, 0);   // fix iOS bug where relative children of scroller disapear while scrolling.  see: http://stackoverflow.com/questions/9807620/ipad-safari-scrolling-causes-html-elements-to-disappear-and-reappear-with-a-dela
+  }
+}
+
+.overflow-auto {
+  overflow-x: hidden;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   top: 0;
   right: 0;

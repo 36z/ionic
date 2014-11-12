@@ -453,7 +453,7 @@ window.ionic.version = '1.0.0-beta.13';
   *
   * Ported from github.com/EightMedia/hammer.js Gestures - thanks!
   */
-(function(ionic) {
+(function(ionic, device) {
 
   /**
    * ionic.Gestures
@@ -475,7 +475,7 @@ window.ionic.version = '1.0.0-beta.13';
     // its native behavior. this doesnt prevent the scrolling,
     // but cancels the contextmenu, tap highlighting etc
     // set to false to disable this
-    stop_browser_behavior: 'disable-user-behavior'
+    stop_browser_behavior: device ? 'disable-user-behavior' : false
   };
 
   // detect touchevents
@@ -557,7 +557,7 @@ window.ionic.version = '1.0.0-beta.13';
     // whatever lookup was done to find this element failed to find it
     // so we can't listen for events on it.
     if(element === null) {
-      void 0;
+      console.error('Null element passed to gesture (element does not exist). Not listening for gesture');
       return;
     }
 
@@ -1843,7 +1843,7 @@ window.ionic.version = '1.0.0-beta.13';
       }
     }
   };
-})(window.ionic);
+})(window.ionic, window.device);
 
 (function(window, document, ionic) {
 
@@ -2476,7 +2476,8 @@ ionic.tap = {
            (/^(file|range)$/i).test(e.target.type) ||
            (e.target.dataset ? e.target.dataset.preventScroll : e.target.getAttribute('data-prevent-scroll')) == 'true' || // manually set within an elements attributes
            (!!(/^(object|embed)$/i).test(e.target.tagName)) ||  // flash/movie/object touches should not try to scroll
-           ionic.tap.isElementTapDisabled(e.target); // check if this element, or an ancestor, has `data-tap-disabled` attribute
+           ionic.tap.isElementTapDisabled(e.target) || // check if this element, or an ancestor, has `data-tap-disabled` attribute
+           !window.device; // if running in cordova
   },
 
   isTextInput: function(ele) {
@@ -2626,7 +2627,7 @@ function tapClick(e) {
 
   var c = ionic.tap.pointerCoord(e);
 
-  void 0;
+  console.log('tapClick', e.type, ele.tagName, '('+c.x+','+c.y+')');
   triggerMouseEvent('click', ele, c.x, c.y);
 
   // if it's an input, focus in on the target, otherwise blur
@@ -2642,7 +2643,7 @@ function triggerMouseEvent(type, ele, x, y) {
 }
 
 function tapClickGateKeeper(e) {
-  if(e.target.type == 'submit' && e.detail === 0) {
+  if(!window.device || e.target.type == 'submit' && e.detail === 0) {
     // do not prevent click if it came from an "Enter" or "Go" keypress submit
     return;
   }
@@ -2650,7 +2651,7 @@ function tapClickGateKeeper(e) {
   // do not allow through any click events that were not created by ionic.tap
   if( (ionic.scroll.isScrolling && ionic.tap.containsOrIsTextInput(e.target) ) ||
       (!e.isIonicTap && !ionic.tap.requiresNativeClick(e.target)) ) {
-    void 0;
+    console.log('clickPrevent', e.target.tagName);
     e.stopPropagation();
 
     if( !ionic.tap.isLabelWithTextInput(e.target) ) {
@@ -2666,7 +2667,7 @@ function tapMouseDown(e) {
   if(e.isIonicTap || tapIgnoreEvent(e)) return;
 
   if(tapEnabledTouchEvents) {
-    void 0;
+    console.log('mousedown', 'stop event');
     e.stopPropagation();
 
     if( (!ionic.tap.isTextInput(e.target) || tapLastTouchTarget !== e.target) && !(/^(select|option)$/i).test(e.target.tagName) ) {
@@ -2780,7 +2781,7 @@ function tapEnableTouchEvents() {
 }
 
 function tapIgnoreEvent(e) {
-  if(e.isTapHandled) return true;
+  if(!window.device || e.isTapHandled) return true;
   e.isTapHandled = true;
 
   if( ionic.scroll.isScrolling && ionic.tap.containsOrIsTextInput(e.target) ) {
@@ -2827,7 +2828,7 @@ function tapHandleFocus(ele) {
 function tapFocusOutActive() {
   var ele = tapActiveElement();
   if(ele && ((/^(input|textarea|select)$/i).test(ele.tagName) || ele.isContentEditable) ) {
-    void 0;
+    console.log('tapFocusOutActive', ele.tagName);
     ele.blur();
   }
   tapActiveElement(null);
@@ -2847,7 +2848,7 @@ function tapFocusIn(e) {
     // 2) There is an active element which is a text input
     // 3) A text input was just set to be focused on by a touch event
     // 4) A new focus has been set, however the target isn't the one the touch event wanted
-    void 0;
+    console.log('focusin', 'tapTouchFocusedInput');
     tapTouchFocusedInput.focus();
     tapTouchFocusedInput = null;
   }
@@ -3356,7 +3357,7 @@ function keyboardSetShow(e) {
 
   keyboardFocusInTimer = setTimeout(function(){
     if ( keyboardLastShow + 350 > Date.now() ) return;
-    void 0;
+    console.log('keyboardSetShow');
     keyboardLastShow = Date.now();
     var keyboardHeight;
     var elementBounds = keyboardActiveElement.getBoundingClientRect();
@@ -3393,7 +3394,7 @@ function keyboardShow(element, elementTop, elementBottom, viewportHeight, keyboa
 
   details.contentHeight = viewportHeight - keyboardHeight;
 
-  void 0;
+  console.log('keyboardShow', keyboardHeight, details.contentHeight);
 
   // figure out if the element is under the keyboard
   details.isElementUnderKeyboard = (details.elementBottom > details.contentHeight);
