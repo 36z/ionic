@@ -10,7 +10,7 @@ describe('$ionicPopup service', function() {
     it('should make a popup element appended to body', function() {
       var popup = TestUtil.unwrapPromise($ionicPopup._createPopup());
       expect(popup.element).toBeTruthy();
-      expect(popup.element.hasClass('popup')).toBe(true);
+      expect(popup.element.hasClass('popup-container')).toBe(true);
       expect(popup.element.parent()[0]).toBe(document.body);
     });
     it('should default to $rootScope child as scope', inject(function($rootScope) {
@@ -252,7 +252,7 @@ describe('$ionicPopup service', function() {
       expect(previousPopup.show).toHaveBeenCalled();
     }));
 
-    it('should always release backdrop and remove popup-open and deregister back if no previous', inject(function($q, $timeout, $ionicBackdrop, $ionicPlatform) {
+    it('should release backdrop and remove popup-open and deregister back if no previous', inject(function($q, $timeout, $ionicBackdrop, $ionicPlatform) {
       var fakePopup = {
         show: jasmine.createSpy('show'),
         remove: jasmine.createSpy('remove'),
@@ -265,17 +265,21 @@ describe('$ionicPopup service', function() {
       $ionicPopup.show();
       fakePopup.responseDeferred.resolve();
       $timeout.flush();
-      expect($ionicBackdrop.release).toHaveBeenCalled();
       expect(backDoneSpy).toHaveBeenCalled();
-      expect(document.body.classList.contains('popup-open')).toBe(false);
-    }));
-    it('backdrop release should be called even if there are multiple popups', inject(function($q, $timeout, $ionicBackdrop) {
-      popup = $ionicPopup.show();
-      popup2 = $ionicPopup.show();
-      spyOn($ionicBackdrop, 'release');
-      popup.close();
       $timeout.flush();
       expect($ionicBackdrop.release).toHaveBeenCalled();
+      expect(document.body.classList.contains('popup-open')).toBe(false);
+    }));
+    it('template should only overwrite prompt input if it includes html', inject(function($timeout) {
+      spyOn($ionicPopup, '_createPopup');
+      $ionicPopup.prompt({template: "Tacos!"});
+      params = $ionicPopup._createPopup.mostRecentCall.args;
+      expect(params[0].template.indexOf('<span>Tacos!</span>')).toEqual(0);
+      expect(params[0].template.indexOf('<input')).toBeGreaterThan(6);
+
+      $ionicPopup.prompt({template: '<input type="email" />'});
+      params = $ionicPopup._createPopup.mostRecentCall.args;
+      expect(params[0].template.indexOf('<input type="email" />')).toEqual(0);
     }));
   });
 });

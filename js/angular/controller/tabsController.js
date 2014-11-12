@@ -1,9 +1,9 @@
 IonicModule
 .controller('$ionicTabs', [
-  '$scope', 
-  '$ionicViewService', 
-  '$element', 
-function($scope, $ionicViewService, $element) {
+  '$scope',
+  '$ionicHistory',
+  '$element',
+function($scope, $ionicHistory, $element) {
   var _selectedTab = null;
   var self = this;
   self.tabs = [];
@@ -16,11 +16,8 @@ function($scope, $ionicViewService, $element) {
   };
 
   self.add = function(tab) {
-    $ionicViewService.registerHistory(tab);
+    $ionicHistory.registerHistory(tab);
     self.tabs.push(tab);
-    if(self.tabs.length === 1) {
-      self.select(tab);
-    }
   };
 
   self.remove = function(tab) {
@@ -55,17 +52,19 @@ function($scope, $ionicViewService, $element) {
     var tabIndex;
     if (angular.isNumber(tab)) {
       tabIndex = tab;
+      if (tabIndex >= self.tabs.length) return;
       tab = self.tabs[tabIndex];
     } else {
       tabIndex = self.tabs.indexOf(tab);
     }
-    if (!tab || tabIndex == -1) {
-      throw new Error('Cannot select tab "' + tabIndex + '"!');
+
+    if (arguments.length === 1) {
+      shouldEmitEvent = !!(tab.navViewName || tab.uiSref);
     }
 
     if (_selectedTab && _selectedTab.$historyId == tab.$historyId) {
       if (shouldEmitEvent) {
-        $ionicViewService.goToHistoryRoot(tab.$historyId);
+        $ionicHistory.goToHistoryRoot(tab.$historyId);
       }
     } else {
       forEach(self.tabs, function(tab) {
@@ -85,13 +84,11 @@ function($scope, $ionicViewService, $element) {
           navViewName: tab.navViewName,
           hasNavView: !!tab.navViewName,
           title: tab.title,
-          //Skip the first character of href if it's #
           url: tab.href,
           uiSref: tab.uiSref
         };
-        $scope.$emit('viewState.changeHistory', viewData);
+        $scope.$emit('$ionicHistory.change', viewData);
       }
     }
   };
 }]);
-
