@@ -4,6 +4,7 @@ describe('$ionicScroll Controller', function() {
 
   beforeEach(function() {
     ionic.Platform.ready = function(cb) { cb(); };
+    ionic.requestAnimationFrame = function(cb) { cb(); };
   });
 
   var scope, ctrl, timeout;
@@ -102,71 +103,6 @@ describe('$ionicScroll Controller', function() {
     expect(ctrl.scrollView.resize).toHaveBeenCalled();
   });
 
-  it('should not remember scroll position on $viewContentLoaded if no viewId', function() {
-    var historyData = {};
-    setup();
-    spyOn(ctrl, 'rememberScrollPosition');
-    spyOn(ctrl, 'scrollToRememberedPosition');
-    scope.$broadcast('$viewContentLoaded', historyData);
-    timeout.flush();
-    expect(ctrl.rememberScrollPosition).not.toHaveBeenCalledWith();
-    expect(ctrl.scrollToRememberedPosition).not.toHaveBeenCalled();
-  });
-
-  it('should remember scroll position on $viewContentLoaded event', function() {
-    var historyData = { viewId: '1' };
-    setup();
-    spyOn(ctrl, 'rememberScrollPosition');
-    spyOn(ctrl, 'scrollToRememberedPosition');
-    scope.$broadcast('$viewContentLoaded', historyData);
-    timeout.flush();
-    expect(ctrl.rememberScrollPosition).toHaveBeenCalledWith('1');
-    expect(ctrl.scrollToRememberedPosition).toHaveBeenCalled();
-  });
-
-  it('should forget on $viewHistory.viewBack after $viewContentLoaded', inject(function($rootScope, $timeout) {
-    var historyData = { viewId: 'foo' };
-    setup();
-    spyOn($rootScope, '$on').andCallThrough();
-    scope.$broadcast('$viewContentLoaded', historyData);
-    $timeout.flush();
-    expect(scope.$on).toHaveBeenCalledWith('$viewHistory.viewBack', jasmine.any(Function));
-
-    //Should not forget unless backViewId is the same
-    spyOn(ctrl, 'forgetScrollPosition');
-    $rootScope.$broadcast('$viewHistory.viewBack', 'bar');
-    expect(ctrl.forgetScrollPosition).not.toHaveBeenCalled();
-    $rootScope.$broadcast('$viewHistory.viewBack', 'foo');
-    expect(ctrl.forgetScrollPosition).toHaveBeenCalled();
-  }));
-
-  it('should not remember scrollValues on $destroy without id', inject(function($$scrollValueCache) {
-    setup();
-    spyOn(ctrl.scrollView, 'getValues');
-    scope.$destroy();
-    expect(ctrl.scrollView.getValues).not.toHaveBeenCalled();
-    expect($$scrollValueCache).toEqual({});
-  }));
-
-  it('should remember scrollValues on $destroy with id', inject(function($$scrollValueCache) {
-    setup();
-    ctrl.rememberScrollPosition('super');
-    spyOn(ctrl.scrollView, 'getValues').andCallFake(function() {
-      return 'scrollValues';
-    });
-    scope.$destroy();
-    expect(ctrl.scrollView.getValues).toHaveBeenCalled();
-    expect($$scrollValueCache).toEqual({
-      'super': 'scrollValues'
-    });
-  }));
-
-  it('rememberScrollPosition should throw without id', function() {
-    setup();
-    expect(function() {
-      ctrl.rememberScrollPosition();
-    }).toThrow();
-  });
 
   it('should unbind window event listener on scope destroy', inject(function($window) {
     spyOn(ionic, 'on');
@@ -175,22 +111,6 @@ describe('$ionicScroll Controller', function() {
     expect(ionic.on).toHaveBeenCalledWith('resize', jasmine.any(Function), $window);
     scope.$destroy();
     expect(ionic.off).toHaveBeenCalledWith('resize', jasmine.any(Function), $window);
-  }));
-
-  it('rememberScrollPosition should set id', function() {
-    setup();
-    expect(ctrl._rememberScrollId).toBeFalsy();
-    ctrl.rememberScrollPosition('banana');
-    expect(ctrl._rememberScrollId).toBe('banana');
-  });
-
-  it('forgetScrollPosition should remove from cache and unset id', inject(function($$scrollValueCache) {
-    setup();
-    ctrl._rememberScrollId = 'elephant';
-    $$scrollValueCache.elephant = 'stampede';
-    ctrl.forgetScrollPosition();
-    expect(ctrl._rememberScrollId).toBeFalsy();
-    expect($$scrollValueCache.elephant).toBeFalsy();
   }));
 
   it('should listen to scroll event and call $onScroll', function() {
@@ -242,15 +162,6 @@ describe('$ionicScroll Controller', function() {
             return { then: function(cb) { cb(); } };
           };
         });
-
-        it('scrollToRememberedPosition should work', inject(function($$scrollValueCache) {
-          spyOn(ctrl.scrollView, 'scrollTo');
-          $$scrollValueCache.foo = { left: 3, top: 4 };
-          ctrl._rememberScrollId = 'foo';
-          expect(ctrl.scrollView.scrollTo).not.toHaveBeenCalled();
-          ctrl.scrollToRememberedPosition(shouldAnimate);
-          expect(ctrl.scrollView.scrollTo).toHaveBeenCalledWith(3, 4, shouldAnimate);
-        }));
         it('.scrollTop', function() {
           spyOn(ctrl.scrollView, 'scrollTo');
           ctrl.scrollTop(shouldAnimate);
@@ -323,7 +234,7 @@ describe('$ionicScroll Controller', function() {
       }
     };
     module('ionic', function($provide) {
-      $provide.value('$document', [ { getElementById: function(){ return ele; } } ]);
+      $provide.value('$document', [ { getElementById: function(){ return ele; }, createElement: function(tagName){ return document.createElement(tagName); } } ]);
     });
     inject(function($controller, $rootScope, $location, $timeout) {
       var scrollCtrl = $controller('$ionicScroll', {
@@ -354,10 +265,12 @@ describe('$ionicScroll Controller', function() {
     setup({
       el: angular.element('<div><div class="scroll-refresher"></div></div>')[0]
     });
-    spyOn(ctrl.scrollView, 'activatePullToRefresh').andCallFake(function(height, start, refreshing, done) {
+    spyOn(ctrl.scrollView, 'activatePullToRefresh').andCallFake(function(height, start, refreshing, done, show, hide) {
       startCb = start;
       refreshingCb = refreshing;
       doneCb = done;
+      showCb = show;
+      hideCb = hide;
     });
     ctrl._setRefresher(scope, ctrl.element);
 
@@ -378,15 +291,20 @@ describe('$ionicScroll Controller', function() {
     expect(scope.$onPulling).toHaveBeenCalled();
 
     refreshingCb();
-    expect(refresher.classList.contains('active')).toBe(false);
     expect(refresher.classList.contains('refreshing')).toBe(false);
 
     expect(scope.$onRefresh).not.toHaveBeenCalled();
 
     doneCb();
-    expect(refresher.classList.contains('active')).toBe(false);
-    expect(refresher.classList.contains('refreshing')).toBe(true);
     expect(scope.$onRefresh).toHaveBeenCalled();
+
+    expect(refresher.classList.contains('active')).toBe(false);
+
+    showCb();
+    expect(refresher.classList.contains('invisible')).toBe(false);
+
+    hideCb();
+    expect(refresher.classList.contains('invisible')).toBe(true);
   });
 
 });
