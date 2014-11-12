@@ -2244,9 +2244,6 @@ body.grade-b, body.grade-c {
   -webkit-transform-origin: left top;
   transform-origin: left top; }
 
-::-webkit-scrollbar {
-  display: none; }
-
 .scroll-bar {
   position: absolute;
   z-index: 9999; }
@@ -2426,6 +2423,20 @@ ion-infinite-scroll {
   left: 0;
   position: absolute; }
   .overflow-scroll .scroll {
+    position: static;
+    height: 100%;
+    -webkit-transform: translate3d(0, 0, 0); }
+
+.overflow-auto {
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  position: absolute; }
+  .overflow-auto .scroll {
     position: static;
     height: 100%;
     -webkit-transform: translate3d(0, 0, 0); }

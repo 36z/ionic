@@ -46576,17 +46576,17 @@ function($timeout, $controller, $ionicBind) {
     compile: function(element, attr) {
       var innerElement;
 
-      element.addClass('scroll-content ionic-scroll');
-
-      if (attr.scroll != 'false') {
-        //We cannot use normal transclude here because it breaks element.data()
-        //inheritance on compile
-        innerElement = jqLite('<div class="scroll"></div>');
-        innerElement.append(element.contents());
-        element.append(innerElement);
-      } else {
-        element.addClass('scroll-content-false');
-      }
+      //element.addClass('scroll-content ionic-scroll');
+      //
+      //if (attr.scroll != 'false') {
+      //  //We cannot use normal transclude here because it breaks element.data()
+      //  //inheritance on compile
+      //  innerElement = jqLite('<div class="scroll"></div>');
+      //  innerElement.append(element.contents());
+      //  element.append(innerElement);
+      //} else {
+      //  element.addClass('scroll-content-false');
+      //}
 
       return { pre: prelink };
       function prelink($scope, $element, $attr, navViewCtrl) {
@@ -46628,43 +46628,45 @@ function($timeout, $controller, $ionicBind) {
           });
         }
 
-        if ($attr.scroll === "false") {
-          //do nothing
-        } else if(attr.overflowScroll === "true") {
-          $element.addClass('overflow-scroll');
-        } else {
-          var scrollViewOptions = {
-            el: $element[0],
-            delegateHandle: attr.delegateHandle,
-            locking: (attr.locking || 'true') === 'true',
-            bouncing: $scope.$eval($scope.hasBouncing),
-            startX: $scope.$eval($scope.startX) || 0,
-            startY: $scope.$eval($scope.startY) || 0,
-            scrollbarX: $scope.$eval($scope.scrollbarX) !== false,
-            scrollbarY: $scope.$eval($scope.scrollbarY) !== false,
-            scrollingX: $scope.direction.indexOf('x') >= 0,
-            scrollingY: $scope.direction.indexOf('y') >= 0,
-            scrollEventInterval: parseInt($scope.scrollEventInterval, 10) || 10,
-            scrollingComplete: function() {
-              $scope.$onScrollComplete({
-                scrollTop: this.__scrollTop,
-                scrollLeft: this.__scrollLeft
-              });
-            }
-          };
-          $controller('$ionicScroll', {
-            $scope: $scope,
-            scrollViewOptions: scrollViewOptions
-          });
+        $element.addClass('overflow-auto');
 
-          $scope.$on('$destroy', function() {
-            scrollViewOptions.scrollingComplete = angular.noop;
-            delete scrollViewOptions.el;
-            innerElement = null;
-            $element = null;
-            attr.$$element = null;
-          });
-        }
+        //if ($attr.scroll === "false") {
+        //  //do nothing
+        //} else if(attr.overflowScroll === "true") {
+        //  $element.addClass('overflow-scroll');
+        //} else {
+        //  var scrollViewOptions = {
+        //    el: $element[0],
+        //    delegateHandle: attr.delegateHandle,
+        //    locking: (attr.locking || 'true') === 'true',
+        //    bouncing: $scope.$eval($scope.hasBouncing),
+        //    startX: $scope.$eval($scope.startX) || 0,
+        //    startY: $scope.$eval($scope.startY) || 0,
+        //    scrollbarX: $scope.$eval($scope.scrollbarX) !== false,
+        //    scrollbarY: $scope.$eval($scope.scrollbarY) !== false,
+        //    scrollingX: $scope.direction.indexOf('x') >= 0,
+        //    scrollingY: $scope.direction.indexOf('y') >= 0,
+        //    scrollEventInterval: parseInt($scope.scrollEventInterval, 10) || 10,
+        //    scrollingComplete: function() {
+        //      $scope.$onScrollComplete({
+        //        scrollTop: this.__scrollTop,
+        //        scrollLeft: this.__scrollLeft
+        //      });
+        //    }
+        //  };
+        //  $controller('$ionicScroll', {
+        //    $scope: $scope,
+        //    scrollViewOptions: scrollViewOptions
+        //  });
+        //
+        //  $scope.$on('$destroy', function() {
+        //    scrollViewOptions.scrollingComplete = angular.noop;
+        //    delete scrollViewOptions.el;
+        //    innerElement = null;
+        //    $element = null;
+        //    attr.$$element = null;
+        //  });
+        //}
 
       }
     }
